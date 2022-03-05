@@ -6,20 +6,32 @@
         "build": "vite build",
         "preview": "vite preview --port 5050",
         "test:unit": "vitest --run --environment jsdom",
-        "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
+        "test:e2e": "start-server-and-test preview http://127.0.0.1:5050/ cy:run",
+        "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
+        "cy:run": "cypress run",
+        "cy:open": "cypress open"
     },
     "dependencies": {
+        "axios": "^0.26.0",
+        "start-server-and-test": "^1.14.0",
         "vue": "^3.2.31"
     },
     "devDependencies": {
+        "@cypress/vite-dev-server": "^2.2.2",
         "@rushstack/eslint-patch": "^1.1.0",
         "@vitejs/plugin-vue": "^2.2.2",
         "@vue/eslint-config-prettier": "^7.0.0",
         "@vue/test-utils": "^2.0.0-rc.18",
+        "autoprefixer": "^10.4.2",
+        "cypress": "^9.5.1",
+        "dotenv": "^16.0.0",
         "eslint": "^8.5.0",
+        "eslint-plugin-cypress": "^2.12.1",
         "eslint-plugin-vue": "^8.2.0",
         "jsdom": "^19.0.0",
+        "postcss": "^8.4.7",
         "prettier": "^2.5.1",
+        "tailwindcss": "^3.0.23",
         "vite": "^2.8.4",
         "vitest": "^0.5.0"
     }

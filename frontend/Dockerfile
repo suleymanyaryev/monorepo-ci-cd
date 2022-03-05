@@ -4,11 +4,18 @@ COPY package.json yarn.lock ./
 RUN yarn install
 COPY . .
 
-FROM base as test
-
 FROM base as build
 ENV MODE=production
 RUN yarn build
+
+FROM cypress/browsers:node14.17.0-chrome88-ff89 as test
+WORKDIR /home/app
+COPY package.json yarn.lock ./
+RUN yarn install
+COPY . .
+ENV MODE=production
+RUN yarn build
+
 
 FROM nginx:1.20-alpine as prod
 WORKDIR /home/app
