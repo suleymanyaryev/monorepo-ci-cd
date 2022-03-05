@@ -4,6 +4,10 @@ COPY package.json yarn.lock ./
 RUN yarn install
 COPY . .
 
+FROM base as dev
+ENV MODE=development
+
+
 FROM base as build
 ENV MODE=production
 RUN yarn build

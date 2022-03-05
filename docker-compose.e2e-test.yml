@@ -1,0 +1,30 @@
+version: "3.4"
+
+services:
+  backend:
+    image: monorepo/backend:test
+    build:
+      context: backend
+      target: test
+
+    volumes:
+      - ./backend/.env-sample:/home/app/.env
+
+    environment:
+      - LISTEN_ADDR=0.0.0.0:8081
+
+    command: go run .
+
+  frontend:
+    image: monorepo/frontend:test
+    build:
+      context: frontend
+      target: test
+
+    ports:
+      - "5050:5050"
+
+    environment:
+      - PROXY_URL=http://backend:8081
+
+    command: yarn test:e2e
