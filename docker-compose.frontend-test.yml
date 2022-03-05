@@ -1,0 +1,10 @@
+version: "3.4"
+
+services:
+  service:
+    image: monorepo/frontend:test
+    build:
+      context: frontend
+      target: test
+
+    command: yarn test:unit

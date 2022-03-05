@@ -1,0 +1,10 @@
+version: "3.4"
+
+services:
+  service:
+    image: monorepo/backend:test
+    build:
+      context: backend
+      target: test
+
+    command: go test -v ./...
