@@ -1,6 +1,7 @@
 <script setup>
 import axios from "axios";
 import { ref, computed, onMounted } from "vue";
+import TaskItem from "./components/TaskItem.vue";
 
 const list = ref([]);
 const name = ref("");
@@ -92,43 +93,13 @@ async function toggleState(name) {
             </form>
             <div class="bg-gray-100 p-4 rounded shadow">
                 <TransitionGroup name="list" tag="div">
-                    <div
+                    <TaskItem
                         v-for="item in orderedList"
+                        :item="item"
                         :key="item.name"
-                        class="p-2"
-                    >
-                        <div
-                            class="px-3 py-2 bg-white shadow rounded cursor-pointer select-none"
-                            @dblclick="remove(item.name)"
-                        >
-                            <p
-                                :class="{
-                                    'line-through': item.status === 'done',
-                                }"
-                            >
-                                {{ item.name }}
-                            </p>
-                            <div class="flex mt-2">
-                                <button
-                                    v-if="item.status === 'done'"
-                                    class="px-2 py-0.5 ml-auto text-sm bg-red-500 text-white shadow-sm rounded-sm"
-                                    @dblclick.stop
-                                    @click.stop="toggleState(item.name)"
-                                >
-                                    Undone
-                                </button>
-
-                                <button
-                                    v-else
-                                    class="px-2 py-0.5 ml-auto text-sm bg-green-500 text-white shadow-sm rounded-sm"
-                                    @dblclick.stop
-                                    @click.stop="toggleState(item.name)"
-                                >
-                                    Done
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                        @remove="remove"
+                        @toggle-state="toggleState"
+                    />
                 </TransitionGroup>
 
                 <div v-if="orderedList.length === 0">
