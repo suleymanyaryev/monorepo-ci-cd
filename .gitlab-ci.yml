@@ -4,8 +4,6 @@ stages:
 
 variables:
     RULES_CHANGES_PATH: "**/*"
-    FRONTEND_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-frontend:latest
-    BACKEND_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-backend:latest
 
 .go-cache:
     variables:
@@ -21,10 +19,11 @@ backend-test:
     stage: test
     extends: .go-cache
     script:
-        - cd backend
-        - go mod download
-        - go mod verify
-        - go test -v ./...
+        - echo "backend testing"
+        # - cd backend
+        # - go mod download
+        # - go mod verify
+        # - go test -v ./...
 
 frontend-test:
     image: node:14-alpine
@@ -36,9 +35,18 @@ frontend-test:
         paths:
             - .yarn-cache/
     script:
-        - cd frontend
-        - yarn install --cache-folder .yarn-cache
-        - yarn test:unit
+        - echo "frontend testing"
+        # - cd frontend
+        # - yarn install --cache-folder .yarn-cache
+        # - yarn test:unit
+
+e2e-test:
+    image: node:14-alpine
+    stage: test
+    needs: ["backend-build", "backend-frontend"]
+    script:
+        - echo $BACKEND_LATEST
+        - echo $FRONTEND_LATEST
 
 backend-build:
     image: docker:latest
@@ -47,7 +55,12 @@ backend-build:
     services:
         - docker:dind
     script:
-        - docker build --tag $BACKEND_LATEST --target prod ./backend
+        - export BACKEND_LATEST=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-backend:latest
+        # - docker build --tag $BACKEND_LATEST --target prod ./backend
+        - echo "BACKEND_LATEST=$BACKEND_LATEST" > build.env
+    artifacts:
+        reports:
+            dotenv: build.env
 
 backend-frontend:
     image: docker:latest
@@ -56,4 +69,9 @@ backend-frontend:
     services:
         - docker:dind
     script:
-        - docker build --tag $FRONTEND_LATEST --target prod ./frontend
+        - export FRONTEND_LATEST=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-frontend:latest
+        # - docker build --tag $FRONTEND_LATEST --target prod ./frontend
+        - echo "BACKEND_LATEST=$BACKEND_LATEST" > build.env
+    artifacts:
+        reports:
+            dotenv: build.env
