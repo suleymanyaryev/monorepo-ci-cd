@@ -59,6 +59,7 @@ backend-build:
         - export BACKEND_LATEST=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-backend:latest
         # - docker build --tag $BACKEND_LATEST --target prod ./backend
         - echo "BACKEND_LATEST=$BACKEND_LATEST" > build.env
+        - echo $BACKEND_LATEST
     artifacts:
         reports:
             dotenv: build.env
@@ -72,7 +73,8 @@ frontend-build:
     script:
         - export FRONTEND_LATEST=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-frontend:latest
         # - docker build --tag $FRONTEND_LATEST --target prod ./frontend
-        - echo "BACKEND_LATEST=$BACKEND_LATEST" > build.env
+        - echo "FRONTEND_LATEST=$FRONTEND_LATEST" > build.env
+        - echo $FRONTEND_LATEST
     artifacts:
         reports:
             dotenv: build.env
