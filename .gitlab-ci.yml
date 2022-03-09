@@ -1,5 +1,6 @@
 stages:
     - test
+    - build
 
 variables:
     RULES_CHANGES_PATH: "**/*"
@@ -38,3 +39,17 @@ frontend-test:
         - cd frontend
         - yarn install --cache-folder .yarn-cache
         - yarn test:unit
+
+backend-build:
+    image: docker:latest
+    stage: build
+    needs: []
+    script:
+        - docker build --tag backend:latest --target prod ./backend
+
+backend-frontend:
+    image: docker:latest
+    stage: build
+    needs: []
+    script:
+        - docker build --tag frontend:latest --target prod ./frontend
