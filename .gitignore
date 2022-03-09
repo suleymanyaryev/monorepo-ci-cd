@@ -19,3 +19,5 @@ cypress.env.json
 
 release/
 *~
+
+draft
