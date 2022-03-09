@@ -30,16 +30,25 @@ variables:
     variables:
         RULES_CHANGES_PATH: "frontend/**/*"
 
+.go-cache:
+    extends: .backend
+    variables:
+        GOPATH: $CI_PROJECT_DIR/.go
+    before_script:
+        - mkdir -p .go
+    cache:
+        paths:
+            - .go/pkg/mod/
+
 backend-test:
     image: golang:1.17-buster
     stage: test
-    extends: .backend
+    extends: .go-cache
     needs: []
-    before_script:
+    script:
         - cd backend
         - go mod download
         - go mod verify
-    script:
         - go test -v ./...
 
 frontend-test:
@@ -47,10 +56,15 @@ frontend-test:
     stage: test
     extends: .frontend
     needs: []
-    before_script:
-        - cd frontend
-        - yarn install
+    cache:
+        - key:
+            files:
+                - yarn.lock
+        paths:
+            - .yarn-cache/
     script:
+        - cd frontend
+        - yarn install --cache-folder .yarn-cache
         - yarn test:unit
 # backend-build:
 #     image: docker:latest
