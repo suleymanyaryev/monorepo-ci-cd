@@ -51,6 +51,9 @@ backend-build:
     needs: ["backend-test"]
     services:
         - docker:dind
+    before_script:
+        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+        - docker pull $BACKEND_LATEST
     script:
         - docker build --tag $BACKEND_LATEST --target prod ./backend
         - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
@@ -62,6 +65,9 @@ frontend-build:
     needs: ["frontend-test"]
     services:
         - docker:dind
+    # before_script:
+    #     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    #     - docker pull $FRONTEND_LATEST
     script:
         - echo "frontend building"
         # - docker build --tag $FRONTEND_LATEST --target prod ./frontend
@@ -81,5 +87,6 @@ e2e-test:
     stage: e2e-test
     needs: ["backend-build", "frontend-build"]
     script:
+        - cd frontend
         - yarn build
         - yarn test:e2e
