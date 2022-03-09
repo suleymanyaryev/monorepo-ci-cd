@@ -20,7 +20,6 @@ backend-test:
     image: golang:1.17-buster
     stage: test
     extends: .go-cache
-    needs: []
     script:
         - cd backend
         - go mod download
@@ -30,7 +29,6 @@ backend-test:
 frontend-test:
     image: node:14-alpine
     stage: test
-    needs: []
     cache:
         key:
             files:
@@ -45,13 +43,17 @@ frontend-test:
 backend-build:
     image: docker:latest
     stage: build
-    needs: []
+    needs: ["backend-test"]
+    services:
+        - docker:dind
     script:
         - docker build --tag $BACKEND_LATEST --target prod ./backend
 
 backend-frontend:
     image: docker:latest
     stage: build
-    needs: []
+    needs: ["frontend-test"]
+    services:
+        - docker:dind
     script:
         - docker build --tag $FRONTEND_LATEST --target prod ./frontend
