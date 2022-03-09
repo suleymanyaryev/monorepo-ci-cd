@@ -7,6 +7,15 @@ variables:
     RULES_CHANGES_PATH: "**/*"
     BACKEND_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-backend:latest
     FRONTEND_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-frontend:latest
+    CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
+
+cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+        - .cache/*
+        - cache/Cypress
+        - node_modules
+        - build
 
 .go-cache:
     variables:
@@ -22,26 +31,20 @@ backend-test:
     stage: test
     extends: .go-cache
     script:
-        - echo "backend testing"
-        # - cd backend
-        # - go mod download
-        # - go mod verify
-        # - go test -v ./...
+        - cd backend
+        - go mod download
+        - go mod verify
+        - go test -v ./...
 
 frontend-test:
-    image: node:14-alpine
+    image: cypress/browsers:node14.17.0-chrome88-ff89
     stage: test
-    cache:
-        key:
-            files:
-                - yarn.lock
-        paths:
-            - .yarn-cache/
     script:
-        - echo "frontend testing"
-        # - cd frontend
-        # - yarn install --cache-folder .yarn-cache
-        # - yarn test:unit
+        - cd frontend
+        - yarn install --frozen-lockfile
+        - npx cypress cache path
+        - npx cypress cache list
+        - yarn test:unit
 
 backend-build:
     image: docker:latest
@@ -50,8 +53,9 @@ backend-build:
     services:
         - docker:dind
     script:
-        - echo "backend building"
-        # - docker build --tag $BACKEND_LATEST --target prod ./backend
+        - docker build --tag $BACKEND_LATEST --target prod ./backend
+        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+        - docker push $BACKEND_LATEST
 
 frontend-build:
     image: docker:latest
@@ -60,13 +64,22 @@ frontend-build:
     services:
         - docker:dind
     script:
-        - echo "frontend building"
-        # - docker build --tag $FRONTEND_LATEST --target prod ./frontend
+        - docker build --tag $FRONTEND_LATEST --target prod ./frontend
+        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+        - docker push $FRONTEND_LATEST
 
 e2e-test:
-    image: node:14-alpine
+    image: cypress/browsers:node14.17.0-chrome88-ff89
+    services:
+        - name: $BACKEND_LATEST
+          alias: backend
+    variables:
+        LISTEN_ADDR: 0.0.0.0:8081
+        HOST: 0.0.0.0
+        PORT: 3001
+        PROXY_URL: http://backend:80
     stage: e2e-test
     needs: ["backend-build", "frontend-build"]
     script:
-        - echo "$BACKEND_LATEST"
-        - echo "$FRONTEND_LATEST"
+        - yarn build
+        - yarn test:e2e
