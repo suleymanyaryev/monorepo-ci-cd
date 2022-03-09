@@ -12,12 +12,12 @@ FROM base as dev
 FROM base as test
 
 FROM base as build
-RUN go build daemon.go
+RUN go build main.go
 
 FROM alpine:3.14 as prod
 WORKDIR /home/belli
 RUN apk update && apk add --no-cache nginx supervisor libc6-compat && rm /etc/nginx/http.d/default.conf
-COPY --from=build /go/src/app/daemon ./
+COPY --from=build /go/src/app/main ./
 COPY ./deploy/nginx/app.conf /etc/nginx/http.d/
 COPY ./deploy/supervisord.conf /etc/supervisord.conf
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
