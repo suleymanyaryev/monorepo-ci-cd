@@ -80,10 +80,10 @@ e2e-test:
         - name: ${BACKEND_LATEST}
           alias: backend
     variables:
-        LISTEN_ADDR: 0.0.0.0:8081
-        HOST: 0.0.0.0
-        PORT: 3001
-        PROXY_URL: http://backend:80
+        LISTEN_ADDR: "0.0.0.0:8081"
+        HOST: "0.0.0.0"
+        PORT: "3001"
+        PROXY_URL: "http://backend:80"
     stage: e2e-test
     needs: ["backend-build", "frontend-build"]
     script:
