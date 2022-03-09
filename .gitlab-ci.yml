@@ -5,6 +5,8 @@ stages:
 
 variables:
     RULES_CHANGES_PATH: "**/*"
+    BACKEND_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-backend:latest
+    FRONTEND_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-frontend:latest
 
 .go-cache:
     variables:
@@ -41,14 +43,6 @@ frontend-test:
         # - yarn install --cache-folder .yarn-cache
         # - yarn test:unit
 
-e2e-test:
-    image: node:14-alpine
-    stage: test
-    needs: ["backend-build", "backend-frontend"]
-    script:
-        - echo $BACKEND_LATEST
-        - echo $FRONTEND_LATEST
-
 backend-build:
     image: docker:latest
     stage: build
@@ -56,13 +50,7 @@ backend-build:
     services:
         - docker:dind
     script:
-        - export BACKEND_LATEST=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-backend:latest
         # - docker build --tag $BACKEND_LATEST --target prod ./backend
-        - echo "BACKEND_LATEST=$BACKEND_LATEST" > build.env
-        - echo $BACKEND_LATEST
-    artifacts:
-        reports:
-            dotenv: build.env
 
 frontend-build:
     image: docker:latest
@@ -71,13 +59,7 @@ frontend-build:
     services:
         - docker:dind
     script:
-        - export FRONTEND_LATEST=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-frontend:latest
         # - docker build --tag $FRONTEND_LATEST --target prod ./frontend
-        - echo "FRONTEND_LATEST=$FRONTEND_LATEST" > build.env
-        - echo $FRONTEND_LATEST
-    artifacts:
-        reports:
-            dotenv: build.env
 
 e2e-test:
     image: node:14-alpine
