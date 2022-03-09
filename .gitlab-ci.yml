@@ -4,6 +4,8 @@ stages:
 
 variables:
     RULES_CHANGES_PATH: "**/*"
+    FRONTEND_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-frontend:latest
+    BACKEND_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-backend:latest
 
 .go-cache:
     variables:
@@ -45,11 +47,11 @@ backend-build:
     stage: build
     needs: []
     script:
-        - docker build --tag backend:latest --target prod ./backend
+        - docker build --tag $BACKEND_LATEST --target prod ./backend
 
 backend-frontend:
     image: docker:latest
     stage: build
     needs: []
     script:
-        - docker build --tag frontend:latest --target prod ./frontend
+        - docker build --tag $FRONTEND_LATEST --target prod ./frontend
