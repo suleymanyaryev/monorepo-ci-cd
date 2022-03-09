@@ -50,6 +50,7 @@ backend-build:
     services:
         - docker:dind
     script:
+        - echo "backend building"
         # - docker build --tag $BACKEND_LATEST --target prod ./backend
 
 frontend-build:
@@ -59,6 +60,7 @@ frontend-build:
     services:
         - docker:dind
     script:
+        - echo "frontend building"
         # - docker build --tag $FRONTEND_LATEST --target prod ./frontend
 
 e2e-test:
