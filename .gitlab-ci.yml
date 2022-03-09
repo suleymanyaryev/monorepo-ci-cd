@@ -79,7 +79,7 @@ frontend-build:
 
 e2e-test:
     image: node:14-alpine
-    stage: test
+    stage: e2e-test
     needs: ["backend-build", "frontend-build"]
     script:
         - echo $BACKEND_LATEST
