@@ -1,6 +1,7 @@
 stages:
     - test
     - build
+    - e2e-test
 
 variables:
     RULES_CHANGES_PATH: "**/*"
@@ -62,7 +63,7 @@ backend-build:
         reports:
             dotenv: build.env
 
-backend-frontend:
+frontend-build:
     image: docker:latest
     stage: build
     needs: ["frontend-test"]
@@ -75,3 +76,11 @@ backend-frontend:
     artifacts:
         reports:
             dotenv: build.env
+
+e2e-test:
+    image: node:14-alpine
+    stage: test
+    needs: ["backend-build", "frontend-build"]
+    script:
+        - echo $BACKEND_LATEST
+        - echo $FRONTEND_LATEST
