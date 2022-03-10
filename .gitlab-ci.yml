@@ -62,11 +62,11 @@ frontend-build:
     needs: ["frontend-test"]
     services:
         - docker:dind
-    before_script:
-        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
-        - docker pull $FRONTEND_LATEST
+    # before_script:
+    #     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    #     - docker pull $FRONTEND_LATEST
     script:
-        - docker build --cache-from $FRONTEND_LATEST --tag $FRONTEND_LATEST --target prod ./frontend
+        - docker build --tag $FRONTEND_LATEST --target prod ./frontend
         - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
         - docker push $FRONTEND_LATEST
 
