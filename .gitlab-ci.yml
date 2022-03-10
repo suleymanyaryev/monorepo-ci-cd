@@ -87,6 +87,7 @@ e2e-test:
           alias: frontend
 
     variables:
+        FF_NETWORK_PER_BUILD: 1
         LISTEN_ADDR: "127.0.0.1:8080"
         BACKEND_URL: http://backend
         NGINX_PORT: 5050
