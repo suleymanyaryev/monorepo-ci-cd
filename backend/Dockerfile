@@ -15,8 +15,11 @@ FROM base as build
 RUN go build main.go
 
 FROM alpine:3.14 as prod
-WORKDIR /home/belli
-RUN apk update && apk add --no-cache nginx supervisor libc6-compat && rm /etc/nginx/http.d/default.conf
+WORKDIR /home/app
+RUN apk update && \
+    apk add --no-cache nginx supervisor libc6-compat && \
+    rm /etc/nginx/http.d/default.conf && \
+    mkdir logs
 COPY --from=build /go/src/app/main ./
 COPY ./deploy/nginx/app.conf /etc/nginx/http.d/
 COPY ./deploy/supervisord.conf /etc/supervisord.conf

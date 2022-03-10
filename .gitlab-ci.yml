@@ -83,7 +83,7 @@ e2e-test:
         LISTEN_ADDR: "0.0.0.0:8081"
         HOST: "0.0.0.0"
         PORT: "3001"
-        PROXY_URL: "http://backend:80"
+        PROXY_URL: "http://backend"
     stage: e2e-test
     needs: ["backend-build", "frontend-build"]
     script:
