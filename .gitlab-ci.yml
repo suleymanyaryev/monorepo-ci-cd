@@ -9,13 +9,6 @@ variables:
     FRONTEND_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-frontend:latest
     CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
 
-cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-        - .cache/*
-        - cache/Cypress
-        - frontend/node_modules
-
 .go-cache:
     variables:
         GOPATH: $CI_PROJECT_DIR/.go
@@ -36,13 +29,17 @@ backend-test:
         - go test -v ./...
 
 frontend-test:
-    image: cypress/browsers:node14.17.0-chrome88-ff89
+    image: node:14-alpine
     stage: test
+    cache:
+        key:
+            files:
+                - yarn.lock
+        paths:
+            - .yarn-cache/
     script:
         - cd frontend
-        - yarn install --frozen-lockfile
-        - npx cypress cache path
-        - npx cypress cache list
+        - yarn install --cache-folder .yarn-cache
         - yarn test:unit
 
 backend-build:
@@ -65,28 +62,40 @@ frontend-build:
     needs: ["frontend-test"]
     services:
         - docker:dind
-    # before_script:
-    #     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
-    #     - docker pull $FRONTEND_LATEST
+    before_script:
+        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+        - docker pull $FRONTEND_LATEST
     script:
-        - echo "frontend building"
-        # - docker build --tag $FRONTEND_LATEST --target prod ./frontend
-        # - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
-        # - docker push $FRONTEND_LATEST
+        - docker build --cache-from $FRONTEND_LATEST --tag $FRONTEND_LATEST --target prod ./frontend
+        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+        - docker push $FRONTEND_LATEST
 
 e2e-test:
     image: cypress/browsers:node14.17.0-chrome88-ff89
+    cache:
+        key: ${CI_COMMIT_REF_SLUG}
+        paths:
+            - .cache/*
+            - cache/Cypress
+            - node_modules
+
     services:
         - name: ${BACKEND_LATEST}
           alias: backend
+
+        - name: ${FRONTEND_LATEST}
+          alias: frontend
+
     variables:
         LISTEN_ADDR: "0.0.0.0:8081"
-        HOST: "0.0.0.0"
-        PORT: "3001"
-        PROXY_URL: "http://backend"
+        BACKEND_URL: http://backend
+        NGINX_PORT: 5050
+        CYPRESS_BASE_URL: http://frontend:5050
+
     stage: e2e-test
     needs: ["backend-build", "frontend-build"]
     script:
-        - cd frontend
-        - yarn build
+        - yarn install --frozen-lockfile
+        - npx cypress cache path
+        - npx cypress cache list
         - yarn test:e2e

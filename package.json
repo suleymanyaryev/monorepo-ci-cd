@@ -1,6 +1,13 @@
 {
-  "name": "monorepo",
-  "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT"
+    "name": "monorepo",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT",
+    "scripts": {
+        "cy:run": "cypress run",
+        "cy:open": "cypress open"
+    },
+    "devDependencies": {
+        "cypress": "^9.5.1"
+    }
 }
