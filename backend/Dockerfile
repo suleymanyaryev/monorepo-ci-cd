@@ -7,10 +7,6 @@ RUN go mod download
 RUN go mod verify
 COPY . .
 
-FROM base as dev
-
-FROM base as test
-
 FROM base as build
 RUN go build main.go
 

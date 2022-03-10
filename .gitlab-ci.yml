@@ -87,7 +87,7 @@ e2e-test:
           alias: frontend
 
     variables:
-        LISTEN_ADDR: "0.0.0.0:8081"
+        LISTEN_ADDR: "127.0.0.1:8080"
         BACKEND_URL: http://backend
         NGINX_PORT: 5050
         CYPRESS_BASE_URL: http://frontend:5050
