@@ -7,8 +7,13 @@ import (
 )
 
 func (s *Server) HandleGetToDoList(w http.ResponseWriter, r *http.Request) {
-	err := responses.ErrOK
-	responses.SendResponse(w, err, &TODOList)
+	data, err := s.pg.GetToDoList(r.Context())
+	if err != nil {
+		responses.SendResponse(w, responses.ErrInternalServerError, nil)
+		return
+	}
+	err = responses.ErrOK
+	responses.SendResponse(w, err, data)
 }
 
 func (s *Server) HandleCreateToDo(w http.ResponseWriter, r *http.Request) {
@@ -19,26 +24,28 @@ func (s *Server) HandleCreateToDo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hasFound := false
-	for _, todo := range TODOList {
-		if todo.Name == name {
-			hasFound = true
-		}
+	toDoWithName, err := s.pg.GetToDoByName(r.Context(), name)
+	if err != nil {
+		responses.SendResponse(w, responses.ErrInternalServerError, nil)
+		return
 	}
-
-	if hasFound {
+	if toDoWithName != nil {
 		responses.SendResponse(w, responses.ErrConflict, nil)
 		return
 	}
 
-	todo := TODO{
+	todo := responses.ToDO{
 		Name:   name,
 		Status: "undone",
 	}
 
-	TODOList = append(TODOList, todo)
+	err = s.pg.CreateToDo(r.Context(), &todo)
+	if err != nil {
+		responses.SendResponse(w, responses.ErrInternalServerError, nil)
+		return
+	}
 
-	err := responses.ErrOK
+	err = responses.ErrOK
 	responses.SendResponse(w, err, &todo)
 }
 
@@ -56,27 +63,37 @@ func (s *Server) HandleUpdateToDo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hasFound := false
-	tdList := make([]TODO, 0)
-
-	for _, todo := range TODOList {
-		if todo.Name != oldName {
-			tdList = append(tdList, todo)
-		} else {
-			hasFound = true
-			tdList = append(tdList, TODO{
-				Name:   newName,
-				Status: todo.Status,
-			})
-		}
+	if newName == oldName {
+		responses.SendResponse(w, responses.ErrOK, nil)
+		return
 	}
 
-	if !hasFound {
+	oldTodo, err := s.pg.GetToDoByName(r.Context(), oldName)
+	if err != nil {
+		responses.SendResponse(w, responses.ErrInternalServerError, nil)
+		return
+	}
+	if oldTodo == nil {
 		responses.SendResponse(w, responses.ErrNotFound, nil)
 		return
 	}
 
-	TODOList = tdList
+	toDoWithNewName, err := s.pg.GetToDoByName(r.Context(), newName)
+	if err != nil {
+		responses.SendResponse(w, responses.ErrInternalServerError, nil)
+		return
+	}
+	if toDoWithNewName != nil {
+		responses.SendResponse(w, responses.ErrConflict, nil)
+		return
+	}
+
+	err = s.pg.UpdateToDo(r.Context(), oldName, newName)
+	if err != nil {
+		responses.SendResponse(w, responses.ErrInternalServerError, nil)
+		return
+	}
+
 	responses.SendResponse(w, responses.ErrOK, nil)
 }
 
@@ -88,22 +105,22 @@ func (s *Server) HandleDeleteToDo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hasFound := false
-	tdList := make([]TODO, 0)
-	for _, todo := range TODOList {
-		if todo.Name != name {
-			tdList = append(tdList, todo)
-		} else {
-			hasFound = true
-		}
+	todo, err := s.pg.GetToDoByName(r.Context(), name)
+	if err != nil {
+		responses.SendResponse(w, responses.ErrInternalServerError, nil)
+		return
 	}
-
-	if !hasFound {
+	if todo == nil {
 		responses.SendResponse(w, responses.ErrNotFound, nil)
 		return
 	}
 
-	TODOList = tdList
+	err = s.pg.DeleteToDo(r.Context(), name)
+	if err != nil {
+		responses.SendResponse(w, responses.ErrInternalServerError, nil)
+		return
+	}
+
 	responses.SendResponse(w, responses.ErrOK, nil)
 }
 
@@ -121,25 +138,21 @@ func (s *Server) HandleChangeToDoState(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hasFound := false
-	tdList := make([]TODO, 0)
-	for _, todo := range TODOList {
-		if todo.Name != name {
-			tdList = append(tdList, todo)
-		} else {
-			hasFound = true
-			tdList = append(tdList, TODO{
-				Name:   todo.Name,
-				Status: status,
-			})
-		}
+	todo, err := s.pg.GetToDoByName(r.Context(), name)
+	if err != nil {
+		responses.SendResponse(w, responses.ErrInternalServerError, nil)
+		return
 	}
-
-	if !hasFound {
+	if todo == nil {
 		responses.SendResponse(w, responses.ErrNotFound, nil)
 		return
 	}
 
-	TODOList = tdList
+	err = s.pg.ChangeToDoStatus(r.Context(), name, status)
+	if err != nil {
+		responses.SendResponse(w, responses.ErrInternalServerError, nil)
+		return
+	}
+
 	responses.SendResponse(w, responses.ErrOK, nil)
 }
