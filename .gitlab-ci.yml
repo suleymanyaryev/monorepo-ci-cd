@@ -8,21 +8,23 @@ variables:
     BACKEND_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-backend:latest
     FRONTEND_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-frontend:latest
     CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: 5432
+    POSTGRES_USER: todo
+    POSTGRES_PASSWORD: todo
+    POSTGRES_DB: todo
+    POSTGRES_HOST_AUTH_METHOD: trust
 
 backend-test:
     image: golang:1.17-buster
     stage: test
     variables:
         GOPATH: $CI_PROJECT_DIR/.go
-        POSTGRES_USER: todo
-        POSTGRES_PASSWORD: todo
-        POSTGRES_DB: todo
-        POSTGRES_HOST_AUTH_METHOD: trust
-        DB_HOST: postgres
-        DB_PORT: 5432
-        DB_USER: todo
-        DB_PASSWORD: todo
-        DB_DATABASE: todo
+        DB_HOST: $POSTGRES_HOST
+        DB_PORT: $POSTGRES_PORT
+        DB_USER: $POSTGRES_USER
+        DB_PASSWORD: $POSTGRES_PASSWORD
+        DB_DATABASE: $POSTGRES_DB
     cache:
         paths:
             - .go/pkg/mod/
@@ -107,15 +109,16 @@ e2e-test:
         BACKEND_URL: http://backend
         NGINX_PORT: 5050
         CYPRESS_BASE_URL: http://frontend:5050
-        CYPRESS_PGDATABASE: "todo"
-        CYPRESS_PGHOST: postgres
-        CYPRESS_PGPORT: 5432
-        CYPRESS_PGUSER: "todo"
-        CYPRESS_PGPASSWORD: "todo"
-        POSTGRES_USER: todo
-        POSTGRES_PASSWORD: todo
-        POSTGRES_DB: todo
-        POSTGRES_HOST_AUTH_METHOD: trust
+        CYPRESS_PGDATABASE: $POSTGRES_DB
+        CYPRESS_PGHOST: $POSTGRES_HOST
+        CYPRESS_PGPORT: $POSTGRES_PORT
+        CYPRESS_PGUSER: $POSTGRES_USER
+        CYPRESS_PGPASSWORD: $POSTGRES_PASSWORD
+        DB_HOST: $POSTGRES_HOST
+        DB_PORT: $POSTGRES_PORT
+        DB_USER: $POSTGRES_USER
+        DB_PASSWORD: $POSTGRES_PASSWORD
+        DB_DATABASE: $POSTGRES_DB
 
     stage: e2e-test
     needs: ["backend-build", "frontend-build"]
