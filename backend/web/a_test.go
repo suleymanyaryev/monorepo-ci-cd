@@ -21,6 +21,8 @@ type ListCase struct {
 	wantData []interface{}
 }
 
+//
+
 func init() {
 	err := config.ReadConfig("../.env")
 	if err != nil {
