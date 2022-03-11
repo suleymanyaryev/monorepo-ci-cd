@@ -9,7 +9,6 @@ variables:
     FRONTEND_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-frontend:latest
     CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
 
-
 backend-test:
     image: golang:1.17-buster
     stage: test
@@ -99,40 +98,6 @@ e2e-test:
         - npx cypress cache path
         - npx cypress cache list
         - yarn cy:run
-
-
-
-e2e-test:
-    image: cypress/browsers:node14.17.0-chrome88-ff89
-    cache:
-        key: ${CI_COMMIT_REF_SLUG}
-        paths:
-            - .cache/*
-            - cache/Cypress
-            - node_modules
-
-    services:
-        - name: ${BACKEND_LATEST}
-          alias: backend
-
-        - name: ${FRONTEND_LATEST}
-          alias: frontend
-
-    variables:
-        FF_NETWORK_PER_BUILD: 1
-        LISTEN_ADDR: "127.0.0.1:8080"
-        BACKEND_URL: http://backend
-        NGINX_PORT: 5050
-        CYPRESS_BASE_URL: http://frontend:5050
-
-    stage: e2e-test
-    needs: ["backend-build", "frontend-build"]
-    script:
-        - yarn install --frozen-lockfile
-        - npx cypress cache path
-        - npx cypress cache list
-        - yarn cy:run
-
 
 deploy:
     image: alpine:latest
