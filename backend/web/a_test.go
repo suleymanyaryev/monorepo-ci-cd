@@ -22,7 +22,7 @@ type ListCase struct {
 }
 
 func init() {
-	err := config.ReadConfig("")
+	err := config.ReadConfig("../.env")
 	if err != nil {
 		log.WithError(err).Error("error in reading env")
 	}

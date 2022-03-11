@@ -28,7 +28,7 @@ func main() {
 	log.SetFormatter(customFormatter)
 	log.SetLevel(log.DebugLevel)
 
-	err := config.ReadConfig("config.json")
+	err := config.ReadConfig(".env")
 	if err != nil {
 		log.WithError(err).Panic("error reading config file")
 	}

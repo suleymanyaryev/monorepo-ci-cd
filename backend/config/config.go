@@ -16,9 +16,8 @@ type Config struct {
 var Conf *Config
 
 func ReadConfig(source string) (err error) {
-	os.Stat(".env")
-	if _, err := os.Stat(".env"); !(errors.Is(err, os.ErrNotExist)) {
-		err1 := godotenv.Load()
+	if _, err := os.Stat(source); !(errors.Is(err, os.ErrNotExist)) {
+		err1 := godotenv.Load(source)
 		if err1 != nil {
 			return err1
 		}
