@@ -2,9 +2,16 @@ package web
 
 import (
 	"bytes"
+	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"testing"
+
+	"example.com/monorepo-backend/config"
+	"example.com/monorepo-backend/datastore"
+	"example.com/monorepo-backend/responses"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestServer_HandleTodoCreate(t *testing.T) {
@@ -63,24 +70,27 @@ func TestServer_HandleTodoCreate(t *testing.T) {
 		})
 	}()
 
-	// for _, tt := range tests {
-	// 	t.Run(tt.name, func(t *testing.T) {
-	// 		s := NewServer()
-	// 		rr := httptest.NewRecorder()
-	// 		s.HandleCreateToDo(rr, tt.r)
-	// 		res := rr.Result()
-	// 		assert.Equal(t, tt.wantCode, res.StatusCode)
-	// 		if tt.wantCode == http.StatusOK {
-	// 			decoder := json.NewDecoder(res.Body)
-	// 			response := responses.GeneralResponse{}
-	// 			err := decoder.Decode(&response)
-	// 			assert.Empty(t, err)
-	// 			mp, ok := response.Data.(map[string]interface{})
-	// 			assert.Equal(t, true, ok)
-	// 			assert.Equal(t, tt.wantData["name"], mp["name"])
-	// 			assert.Equal(t, tt.wantData["status"], mp["status"])
-	// 			assert.Equal(t, true, ok)
-	// 		}
-	// 	})
-	// }
+	pg, err := datastore.NewPgAccess(config.Conf)
+	assert.Nil(t, err)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := NewServer(pg)
+			rr := httptest.NewRecorder()
+			s.HandleCreateToDo(rr, tt.r)
+			res := rr.Result()
+			assert.Equal(t, tt.wantCode, res.StatusCode)
+			if tt.wantCode == http.StatusOK {
+				decoder := json.NewDecoder(res.Body)
+				response := responses.GeneralResponse{}
+				err := decoder.Decode(&response)
+				assert.Empty(t, err)
+				mp, ok := response.Data.(map[string]interface{})
+				assert.Equal(t, true, ok)
+				assert.Equal(t, tt.wantData["name"], mp["name"])
+				assert.Equal(t, tt.wantData["status"], mp["status"])
+				assert.Equal(t, true, ok)
+			}
+		})
+	}
 }
