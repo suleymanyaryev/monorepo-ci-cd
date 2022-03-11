@@ -31,7 +31,7 @@ backend-test:
 
     services:
         - name: postgres:12-alpine
-          alias: postgres
+          alias: ${POSTGRES_HOST}
 
     before_script:
         - apt update
@@ -94,14 +94,14 @@ e2e-test:
             - node_modules
 
     services:
+        - name: postgres:12-alpine
+          alias: ${POSTGRES_HOST}
+
         - name: ${BACKEND_LATEST}
           alias: backend
 
         - name: ${FRONTEND_LATEST}
           alias: frontend
-
-        - name: postgres:12-alpine
-          alias: postgres
 
     variables:
         FF_NETWORK_PER_BUILD: 1
