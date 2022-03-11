@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"example.com/monorepo-backend/config"
+	"example.com/monorepo-backend/datastore"
 	"example.com/monorepo-backend/web"
 
 	log "github.com/sirupsen/logrus"
@@ -36,7 +37,12 @@ func main() {
 }
 
 func setupServer(quit chan interface{}, signalChan chan os.Signal, conf *config.Config) {
-	s := web.NewServer()
+	pg, err := datastore.NewPgAccess(conf)
+	if err != nil {
+		log.WithError(err).Panic("Could not initialize access to database")
+		return
+	}
+	s := web.NewServer(pg)
 	r := web.NewRouter(s)
 
 	srv := &http.Server{

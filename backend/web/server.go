@@ -1,20 +1,18 @@
 package web
 
 import (
+	"example.com/monorepo-backend/datastore"
 	"github.com/gorilla/mux"
 )
 
-type Server struct{}
-
-type TODO struct {
-	Name   string `json:"name"`
-	Status string `json:"status"`
+type Server struct {
+	pg *datastore.PgAccess
 }
 
-var TODOList []TODO = make([]TODO, 0)
-
-func NewServer() *Server {
-	return &Server{}
+func NewServer(d *datastore.PgAccess) *Server {
+	return &Server{
+		pg: d,
+	}
 }
 
 func NewRouter(s *Server) *mux.Router {

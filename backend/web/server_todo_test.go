@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"testing"
 
+	"example.com/monorepo-backend/config"
+	"example.com/monorepo-backend/datastore"
 	"example.com/monorepo-backend/responses"
 	"github.com/stretchr/testify/assert"
 )
@@ -68,9 +70,12 @@ func TestServer_HandleTodoCreate(t *testing.T) {
 		})
 	}()
 
+	pg, err := datastore.NewPgAccess(config.Conf)
+	assert.Nil(t, err)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := NewServer()
+			s := NewServer(pg)
 			rr := httptest.NewRecorder()
 			s.HandleCreateToDo(rr, tt.r)
 			res := rr.Result()
