@@ -303,6 +303,11 @@ cross-spawn@^7.0.0:
     shebang-command "^2.0.0"
     which "^2.0.1"
 
+cypress-network-idle@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/cypress-network-idle/-/cypress-network-idle-1.4.0.tgz#34d22fddf4b85ba13a43315fb8c3f1f5cabef919"
+  integrity sha512-j6+RyP/7CHoKm+DCxEH12BWHXYEBAS0ifNIYekDdyGq8htuQlAVXGmB99zQWMo4iKpUNPk+oGQpf12hn+KYwvg==
+
 cypress@^9.5.1:
   version "9.5.1"
   resolved "https://registry.yarnpkg.com/cypress/-/cypress-9.5.1.tgz#51162f3688cedf5ffce311b914ef49a7c1ece076"

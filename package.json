@@ -8,6 +8,7 @@
         "cy:open": "cypress open"
     },
     "devDependencies": {
-        "cypress": "^9.5.1"
+        "cypress": "^9.5.1",
+        "cypress-network-idle": "^1.4.0"
     }
 }
