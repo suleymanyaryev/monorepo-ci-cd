@@ -14,11 +14,28 @@ backend-test:
     stage: test
     variables:
         GOPATH: $CI_PROJECT_DIR/.go
+        POSTGRES_USER: todo
+        POSTGRES_PASSWORD: todo
+        POSTGRES_DB: todo
+        POSTGRES_HOST_AUTH_METHOD: trust
+        DB_HOST: postgres
+        DB_PORT: 5432
+        DB_USER: todo
+        DB_PASSWORD: todo
+        DB_DATABASE: todo
     cache:
         paths:
             - .go/pkg/mod/
 
+    services:
+        - name: postgres:12-alpine
+          alias: postgres
+
     before_script:
+        - apt update
+        - apt install -y postgresql-client
+        - export PGPASSWORD=$POSTGRES_PASSWORD
+        - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f ./backend/db.sql
         - mkdir -p .go
     script:
         - cd backend
@@ -90,6 +107,11 @@ e2e-test:
         BACKEND_URL: http://backend
         NGINX_PORT: 5050
         CYPRESS_BASE_URL: http://frontend:5050
+        CYPRESS_PGDATABASE: "todo"
+        CYPRESS_PGHOST: postgres
+        CYPRESS_PGPORT: 5432
+        CYPRESS_PGUSER: "todo"
+        CYPRESS_PGPASSWORD: "todo"
         POSTGRES_USER: todo
         POSTGRES_PASSWORD: todo
         POSTGRES_DB: todo
