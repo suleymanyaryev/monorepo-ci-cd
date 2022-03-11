@@ -9,7 +9,6 @@ variables:
     FRONTEND_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-frontend:latest
     CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
 
-
 backend-test:
     image: golang:1.17-buster
     stage: test
@@ -52,7 +51,6 @@ backend-build:
         - docker pull $BACKEND_LATEST
     script:
         - docker build --cache-from $BACKEND_LATEST --tag $BACKEND_LATEST --target prod ./backend
-        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
         - docker push $BACKEND_LATEST
 
 frontend-build:
@@ -66,7 +64,6 @@ frontend-build:
         - docker pull $FRONTEND_LATEST
     script:
         - docker build --cache-from $FRONTEND_LATEST --tag $FRONTEND_LATEST --target prod ./frontend
-        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
         - docker push $FRONTEND_LATEST
 
 e2e-test:
@@ -74,7 +71,6 @@ e2e-test:
     cache:
         key: ${CI_COMMIT_REF_SLUG}
         paths:
-            - .cache/*
             - cache/Cypress
             - node_modules
 
@@ -85,38 +81,8 @@ e2e-test:
         - name: ${FRONTEND_LATEST}
           alias: frontend
 
-    variables:
-        FF_NETWORK_PER_BUILD: 1
-        LISTEN_ADDR: "127.0.0.1:8080"
-        BACKEND_URL: http://backend
-        NGINX_PORT: 5050
-        CYPRESS_BASE_URL: http://frontend:5050
-
-    stage: e2e-test
-    needs: ["backend-build", "frontend-build"]
-    script:
-        - yarn install --frozen-lockfile
-        - npx cypress cache path
-        - npx cypress cache list
-        - yarn cy:run
-
-
-
-e2e-test:
-    image: cypress/browsers:node14.17.0-chrome88-ff89
-    cache:
-        key: ${CI_COMMIT_REF_SLUG}
-        paths:
-            - .cache/*
-            - cache/Cypress
-            - node_modules
-
-    services:
-        - name: ${BACKEND_LATEST}
-          alias: backend
-
-        - name: ${FRONTEND_LATEST}
-          alias: frontend
+        - name: postgres:12-alpine
+          alias: postgres
 
     variables:
         FF_NETWORK_PER_BUILD: 1
@@ -124,15 +90,25 @@ e2e-test:
         BACKEND_URL: http://backend
         NGINX_PORT: 5050
         CYPRESS_BASE_URL: http://frontend:5050
+        POSTGRES_USER: todo
+        POSTGRES_PASSWORD: todo
+        POSTGRES_DB: todo
+        POSTGRES_HOST_AUTH_METHOD: trust
 
     stage: e2e-test
     needs: ["backend-build", "frontend-build"]
+
+    before_script:
+        - apt update
+        - apt install -y postgresql-client
+        - export PGPASSWORD=$POSTGRES_PASSWORD
+        - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f ./backend/db.sql
+
     script:
         - yarn install --frozen-lockfile
         - npx cypress cache path
         - npx cypress cache list
         - yarn cy:run
-
 
 deploy:
     image: alpine:latest
