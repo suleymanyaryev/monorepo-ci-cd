@@ -8,6 +8,11 @@ describe("TaskForm", () => {
     it("renders properly", () => {
         const wrapper = mount(TaskForm, {
             props: { modelValue: [] },
+            directives: {
+                cy() {
+                    /* stub */
+                },
+            },
         });
         expect(wrapper.text()).toContain("Add");
     });
