@@ -1,10 +1,10 @@
 <script setup>
 import axios from "axios";
 import { ref, computed, onMounted } from "vue";
+import TaskForm from "./components/TaskForm.vue";
 import TaskItem from "./components/TaskItem.vue";
 
 const list = ref([]);
-const name = ref("");
 
 const orderedList = computed(() => {
     const done = [];
@@ -29,18 +29,6 @@ onMounted(() => {
             console.warn(error.message);
         });
 });
-
-async function onSubmit() {
-    try {
-        const formData = new FormData();
-        formData.append("name", name.value);
-        const response = await axios.post("/api/v1/todo/create", formData);
-        list.value.push(response.data.data);
-        name.value = "";
-    } catch (error) {
-        console.warn(error.mesage);
-    }
-}
 
 async function remove(name) {
     try {
@@ -73,28 +61,12 @@ async function toggleState(name) {
 <template>
     <div class="w-full min-h-screen h-full bg-blue-200">
         <div class="p-4 mx-auto w-120">
-            <form
-                @submit.prevent="onSubmit"
-                class="flex w-full items-center bg-gray-100 p-3 rounded shadow mb-4"
-            >
-                <input
-                    v-model="name"
-                    type="text"
-                    placeholder="Type here your task"
-                    class="px-3 py-2 border border-blue-400 grow outline-none rounded-tl rounded-bl"
-                    required
-                />
-                <button
-                    type="submit"
-                    class="w-20 self-stretch bg-blue-400 text-white shrink-0 rounded-tr rounded-br"
-                >
-                    Add
-                </button>
-            </form>
-            <div class="bg-gray-100 p-4 rounded shadow">
+            <TaskForm v-model="list" />
+            <div v-cy="'todo-wrapper'" class="bg-gray-100 p-4 rounded shadow">
                 <TransitionGroup name="list" tag="div">
                     <TaskItem
                         v-for="item in orderedList"
+                        v-cy="'todo-item'"
                         :item="item"
                         :key="item.name"
                         @remove="remove"

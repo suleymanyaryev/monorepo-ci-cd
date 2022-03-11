@@ -25,6 +25,7 @@ defineEmits(["remove", "toggle-state"]);
             <div class="flex mt-2">
                 <button
                     v-if="item.status === 'done'"
+                    v-cy="'btn-undone'"
                     class="px-2 py-0.5 ml-auto text-sm bg-red-500 text-white shadow-sm rounded-sm"
                     @dblclick.stop
                     @click.stop="$emit('toggle-state', item.name)"
@@ -34,6 +35,7 @@ defineEmits(["remove", "toggle-state"]);
 
                 <button
                     v-else
+                    v-cy="'btn-done'"
                     class="px-2 py-0.5 ml-auto text-sm bg-green-500 text-white shadow-sm rounded-sm"
                     @dblclick.stop
                     @click.stop="$emit('toggle-state', item.name)"
