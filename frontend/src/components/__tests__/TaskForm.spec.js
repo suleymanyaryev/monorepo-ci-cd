@@ -14,6 +14,6 @@ describe("TaskForm", () => {
                 },
             },
         });
-        expect(wrapper.text()).toContain("Addd");
+        expect(wrapper.text()).toContain("Add");
     });
 });
