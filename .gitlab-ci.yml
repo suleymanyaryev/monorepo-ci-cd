@@ -154,7 +154,6 @@ e2e-test:
         DB_DATABASE: $POSTGRES_DB
 
     stage: e2e-test
-    needs: ["backend-build", "frontend-build"]
 
     before_script:
         - apt update
