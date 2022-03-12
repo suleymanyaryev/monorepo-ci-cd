@@ -113,60 +113,59 @@ frontend-build:
     script:
         - docker build --cache-from $FRONTEND_LATEST --tag $FRONTEND_LATEST --target prod ./frontend
         - docker push $FRONTEND_LATEST
+# e2e-test:
+#     image: cypress/browsers:node14.17.0-chrome88-ff89
+#     cache:
+#         key: ${CI_COMMIT_REF_SLUG}
+#         paths:
+#             - cache/Cypress
+#             - node_modules
 
-e2e-test:
-    image: cypress/browsers:node14.17.0-chrome88-ff89
-    cache:
-        key: ${CI_COMMIT_REF_SLUG}
-        paths:
-            - cache/Cypress
-            - node_modules
+#     services:
+#         - name: postgres:12-alpine
+#           alias: ${POSTGRES_HOST}
 
-    services:
-        - name: postgres:12-alpine
-          alias: ${POSTGRES_HOST}
+#         - name: ${BACKEND_LATEST}
+#           alias: backend
 
-        - name: ${BACKEND_LATEST}
-          alias: backend
+#         - name: ${FRONTEND_LATEST}
+#           alias: frontend
 
-        - name: ${FRONTEND_LATEST}
-          alias: frontend
+#     variables:
+#         FF_NETWORK_PER_BUILD: 1
+#         LISTEN_ADDR: "127.0.0.1:8080"
+#         BACKEND_URL: http://backend
+#         NGINX_PORT: 5050
+#         CYPRESS_BASE_URL: http://frontend:5050
+#         CYPRESS_PGDATABASE: $POSTGRES_DB
+#         CYPRESS_PGHOST: $POSTGRES_HOST
+#         CYPRESS_PGPORT: $POSTGRES_PORT
+#         CYPRESS_PGUSER: $POSTGRES_USER
+#         CYPRESS_PGPASSWORD: $POSTGRES_PASSWORD
+#         DB_HOST: $POSTGRES_HOST
+#         DB_PORT: $POSTGRES_PORT
+#         DB_USER: $POSTGRES_USER
+#         DB_PASSWORD: $POSTGRES_PASSWORD
+#         DB_DATABASE: $POSTGRES_DB
 
-    variables:
-        FF_NETWORK_PER_BUILD: 1
-        LISTEN_ADDR: "127.0.0.1:8080"
-        BACKEND_URL: http://backend
-        NGINX_PORT: 5050
-        CYPRESS_BASE_URL: http://frontend:5050
-        CYPRESS_PGDATABASE: $POSTGRES_DB
-        CYPRESS_PGHOST: $POSTGRES_HOST
-        CYPRESS_PGPORT: $POSTGRES_PORT
-        CYPRESS_PGUSER: $POSTGRES_USER
-        CYPRESS_PGPASSWORD: $POSTGRES_PASSWORD
-        DB_HOST: $POSTGRES_HOST
-        DB_PORT: $POSTGRES_PORT
-        DB_USER: $POSTGRES_USER
-        DB_PASSWORD: $POSTGRES_PASSWORD
-        DB_DATABASE: $POSTGRES_DB
+#     stage: e2e-test
+#     needs: ["backend-build", "frontend-build"]
 
-    stage: e2e-test
-    needs: ["backend-build", "frontend-build"]
+#     before_script:
+#         - apt update
+#         - apt install -y postgresql-client
+#         - export PGPASSWORD=$POSTGRES_PASSWORD
+#         - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f ./backend/db.sql
 
-    before_script:
-        - apt update
-        - apt install -y postgresql-client
-        - export PGPASSWORD=$POSTGRES_PASSWORD
-        - psql -h "postgres" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f ./backend/db.sql
+#     script:
+#         - yarn install --frozen-lockfile
+#         - npx cypress cache path
+#         - npx cypress cache list
+#         - yarn cy:run
 
-    script:
-        - yarn install --frozen-lockfile
-        - npx cypress cache path
-        - npx cypress cache list
-        - yarn cy:run
+# deploy:
+#     image: alpine:latest
+#     stage: deploy
 
-deploy:
-    image: alpine:latest
-    stage: deploy
-
-    script:
-        - echo "Deploying"
+#     script:
+#         - echo "Deploying"
