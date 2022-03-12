@@ -28,7 +28,7 @@ func TestServer_HandleTodoCreate(t *testing.T) {
 		tests = append(tests, Case{
 			name:     "Create task",
 			r:        request,
-			wantCode: http.StatusBadRequest,
+			wantCode: http.StatusOK,
 			wantData: map[string]interface{}{
 				"name":   "Test",
 				"status": "undone",

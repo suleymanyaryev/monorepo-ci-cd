@@ -8,7 +8,7 @@ describe("Main page", () => {
         cy.get("[data-cy='form-input']").type("test 1");
         cy.get("[data-cy='form-submit']").click();
         cy.get("[data-cy='todo-wrapper'] [data-cy='todo-item']").contains(
-            "test 1"
+            "test 2"
         );
 
         cy.waitForNetworkIdle(500);

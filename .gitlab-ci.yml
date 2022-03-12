@@ -49,9 +49,9 @@ variables:
         RULES_CHANGES_PATH: "frontend/**/*"
 
 backend-test:
+    stage: test
     image: golang:1.17-buster
     extends: .backend
-    stage: test
     variables:
         GOPATH: $CI_PROJECT_DIR/.go
         DB_HOST: $POSTGRES_HOST
@@ -80,9 +80,9 @@ backend-test:
         - go test -v ./...
 
 frontend-test:
+    stage: test
     image: node:14-alpine
     extends: .frontend
-    stage: test
     cache:
         key:
             files:
@@ -95,9 +95,9 @@ frontend-test:
         - yarn test:unit
 
 backend-build:
+    stage: build
     image: docker:latest
     extends: .backend
-    stage: build
     needs: ["backend-test"]
     services:
         - docker:dind
@@ -109,9 +109,9 @@ backend-build:
         - docker push $BACKEND_LATEST
 
 frontend-build:
+    stage: build
     image: docker:latest
     extends: .frontend
-    stage: build
     needs: ["frontend-test"]
     services:
         - docker:dind
@@ -123,6 +123,7 @@ frontend-build:
         - docker push $FRONTEND_LATEST
 
 e2e-test:
+    stage: e2e-test
     image: cypress/browsers:node14.17.0-chrome88-ff89
     extends: .base-rules
     cache:
@@ -157,8 +158,6 @@ e2e-test:
         DB_USER: $POSTGRES_USER
         DB_PASSWORD: $POSTGRES_PASSWORD
         DB_DATABASE: $POSTGRES_DB
-
-    stage: e2e-test
 
     before_script:
         - apt update
