@@ -5,6 +5,7 @@ stages:
     - deploy
 
 variables:
+    RULES_CHANGES_PATH: "**/*"
     BACKEND_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-backend:latest
     FRONTEND_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME-frontend:latest
     CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
@@ -15,8 +16,33 @@ variables:
     POSTGRES_DB: todo
     POSTGRES_HOST_AUTH_METHOD: trust
 
+.base-rules:
+    rules:
+        - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+          when: always
+        - if: '$CI_PIPELINE_SOURCE == "push"'
+          when: never
+        - if: $CI_COMMIT_TAG
+          when: never
+        - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+          changes:
+              - $RULES_CHANGES_PATH
+        - when: manual
+          allow_failure: true
+
+.backend:
+    extends: .base-rules
+    variables:
+        RULES_CHANGES_PATH: "backend/**/*"
+
+.frontend:
+    extends: .base-rules
+    variables:
+        RULES_CHANGES_PATH: "frontend/**/*"
+
 backend-test:
     image: golang:1.17-buster
+    extends: .backend
     stage: test
     variables:
         GOPATH: $CI_PROJECT_DIR/.go
@@ -47,6 +73,7 @@ backend-test:
 
 frontend-test:
     image: node:14-alpine
+    extends: .frontend
     stage: test
     cache:
         key:
@@ -61,6 +88,7 @@ frontend-test:
 
 backend-build:
     image: docker:latest
+    extends: .backend
     stage: build
     needs: ["backend-test"]
     services:
@@ -74,6 +102,7 @@ backend-build:
 
 frontend-build:
     image: docker:latest
+    extends: .frontend
     stage: build
     needs: ["frontend-test"]
     services:

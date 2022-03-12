@@ -3,7 +3,6 @@
 ---
 
 This is simple TODO app. Backend written in Golang and frontend in Vuejs.
-There isn't used any database systems. All TODO items is stored in memory.
 
 **Features:**
 
